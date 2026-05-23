@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useListApplications, getListApplicationsQueryKey } from "@workspace/api-client-react";
+import { useListApplications, getListApplicationsQueryKey } from "@/lib/local-hooks";
 import { Layout } from "../components/layout";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";

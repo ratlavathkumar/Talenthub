@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useUserAuthContext } from "@/contexts";
-import { useListApplications } from "@workspace/api-client-react";
+import { useListApplications } from "@/lib/local-hooks";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import {
   User, Mail, Phone, MapPin, FileText, Upload, Loader2, LogOut,
@@ -130,7 +130,7 @@ export default function Profile() {
                     <div className="relative group">
                       {avatarPreview || user.profileImageUrl ? (
                         <img
-                          src={avatarPreview ?? `/api/storage${user.profileImageUrl}`}
+                          src={avatarPreview ?? user.profileImageUrl ?? undefined}
                           alt={user.name}
                           className="w-20 h-20 rounded-2xl object-cover border-2 border-border"
                         />
@@ -182,7 +182,7 @@ export default function Profile() {
                     </Label>
                     {user.resumeUrl && (
                       <div className="flex items-center gap-2 mb-2">
-                        <a href={`/api/storage${user.resumeUrl}`} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
+                        <a href={user.resumeUrl ?? "#"} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
                           <FileText className="w-3 h-3" /> View current resume
                         </a>
                       </div>

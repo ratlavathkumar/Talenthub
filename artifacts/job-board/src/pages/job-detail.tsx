@@ -1,4 +1,4 @@
-import { useGetJob, useApplyToJob, useIncrementJobView, useListJobs } from "@workspace/api-client-react";
+import { useGetJob, useApplyToJob, useIncrementJobView, useListJobs } from "@/lib/local-hooks";
 import { useParams, Link } from "wouter";
 import { Layout } from "../components/layout";
 import { Button } from "../components/ui/button";

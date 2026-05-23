@@ -1,4 +1,4 @@
-import { useListJobs } from "@workspace/api-client-react";
+import { useListJobs } from "@/lib/local-hooks";
 import { Layout } from "../components/layout";
 import { JobCard } from "../components/job-card";
 import { Button } from "../components/ui/button";

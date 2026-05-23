@@ -1,4 +1,4 @@
-import { Job } from "@workspace/api-client-react";
+import { Job } from "@/lib/storage";
 import { Link, useLocation } from "wouter";
 import { MapPin, Clock, Globe, Users, Eye, Heart, DollarSign } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "./ui/card";

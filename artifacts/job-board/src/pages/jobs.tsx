@@ -1,4 +1,4 @@
-import { useListJobs } from "@workspace/api-client-react";
+import { useListJobs } from "@/lib/local-hooks";
 import { useLocation } from "wouter";
 import { Layout } from "../components/layout";
 import { JobCard } from "../components/job-card";
@@ -23,7 +23,6 @@ export default function Jobs() {
   const [isRemote, setIsRemote] = useState(searchParams.get("remote") === "true");
   const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "newest");
   
-  // Sync URL changes to state (e.g. back button)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setSearch(params.get("search") || "");
@@ -33,7 +32,6 @@ export default function Jobs() {
     setSortBy(params.get("sortBy") || "newest");
   }, [location]);
 
-  // Build query params for the API hook
   const queryParams = {
     ...(search.trim() ? { search } : {}),
     ...(category !== "all" ? { category } : {}),
@@ -43,7 +41,6 @@ export default function Jobs() {
 
   const { data: jobs, isLoading } = useListJobs(queryParams);
 
-  // We filter remote locally since the API spec doesn't explicitly expose a remote filter param in listJobsParams
   const filteredJobs = jobs?.filter(job => isRemote ? job.remote : true) || [];
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -106,7 +103,6 @@ export default function Jobs() {
       </div>
 
       <div className="container mx-auto px-4 sm:px-8 py-10 flex flex-col md:flex-row gap-10 max-w-7xl">
-        {/* Sidebar Filters */}
         <aside className="w-full md:w-64 lg:w-72 shrink-0 space-y-6">
           <div className="flex items-center justify-between pb-4 border-b border-border/40">
             <div className="flex items-center gap-2 font-semibold text-lg">
@@ -169,7 +165,6 @@ export default function Jobs() {
           </div>
         </aside>
 
-        {/* Main Content */}
         <div className="flex-1 min-w-0">
           <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h2 className="text-xl font-semibold">

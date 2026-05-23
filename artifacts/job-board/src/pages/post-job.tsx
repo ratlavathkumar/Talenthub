@@ -1,4 +1,4 @@
-import { useCreateJob } from "@workspace/api-client-react";
+import { useCreateJob } from "@/lib/local-hooks";
 import { useLocation } from "wouter";
 import { Layout } from "../components/layout";
 import { AdminGate } from "../components/admin-gate";

@@ -12,67 +12,92 @@ export interface UserProfile {
   createdAt: string;
 }
 
-const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+interface StoredUser extends UserProfile {
+  password: string;
+}
 
-async function apiFetch(path: string, init?: RequestInit) {
-  const res = await fetch(`${BASE}/api${path}`, {
-    ...init,
-    credentials: "include",
-    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
-  });
-  return res;
+const USERS_KEY = "talentHub_users";
+const SESSION_KEY = "talentHub_currentUser";
+
+function readUsers(): StoredUser[] {
+  try { return JSON.parse(localStorage.getItem(USERS_KEY) || "[]"); } catch { return []; }
+}
+function writeUsers(users: StoredUser[]): void {
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+function readSession(): UserProfile | null {
+  try { return JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); } catch { return null; }
+}
+function writeSession(user: UserProfile | null): void {
+  localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+}
+function nextUserId(): number {
+  const users = readUsers();
+  return users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
 }
 
 export function useUserAuth() {
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUserState] = useState<UserProfile | null>(() => readSession());
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    apiFetch("/auth/user/me")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        setUser(data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
-
-  const register = async (data: { name: string; email: string; password: string; phone?: string; location?: string }) => {
-    const r = await apiFetch("/auth/user/register", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-    const json = await r.json();
-    if (!r.ok) throw new Error(json.error ?? "Registration failed");
-    setUser(json);
-    return json as UserProfile;
+  const setUser = (u: UserProfile | null) => {
+    writeSession(u);
+    setUserState(u);
   };
 
-  const login = async (email: string, password: string) => {
-    const r = await apiFetch("/auth/user/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
-    const json = await r.json();
-    if (!r.ok) throw new Error(json.error ?? "Invalid credentials");
-    setUser(json);
-    return json as UserProfile;
+  const register = async (data: {
+    name: string;
+    email: string;
+    password: string;
+    phone?: string;
+    location?: string;
+  }): Promise<UserProfile> => {
+    const users = readUsers();
+    if (users.find(u => u.email.toLowerCase() === data.email.toLowerCase())) {
+      throw new Error("Email already registered");
+    }
+    const profile: UserProfile = {
+      id: nextUserId(),
+      name: data.name,
+      email: data.email,
+      phone: data.phone ?? null,
+      bio: null,
+      location: data.location ?? null,
+      profileImageUrl: null,
+      resumeUrl: null,
+      createdAt: new Date().toISOString(),
+    };
+    writeUsers([...users, { ...profile, password: data.password }]);
+    setUser(profile);
+    return profile;
   };
 
-  const logout = async () => {
-    await apiFetch("/auth/user/logout", { method: "POST" });
+  const login = async (email: string, password: string): Promise<UserProfile> => {
+    const users = readUsers();
+    const found = users.find(
+      u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+    );
+    if (!found) throw new Error("Invalid credentials");
+    const { password: _pw, ...profile } = found;
+    setUser(profile);
+    return profile;
+  };
+
+  const logout = async (): Promise<void> => {
     setUser(null);
   };
 
-  const updateProfile = async (updates: Partial<UserProfile>) => {
-    const r = await apiFetch("/auth/user/me", {
-      method: "PATCH",
-      body: JSON.stringify(updates),
-    });
-    const json = await r.json();
-    if (!r.ok) throw new Error(json.error ?? "Update failed");
-    setUser(json);
-    return json as UserProfile;
+  const updateProfile = async (updates: Partial<UserProfile>): Promise<UserProfile> => {
+    if (!user) throw new Error("Not logged in");
+    const users = readUsers();
+    const idx = users.findIndex(u => u.id === user.id);
+    if (idx === -1) throw new Error("User not found");
+    const updated: StoredUser = { ...users[idx], ...updates };
+    users[idx] = updated;
+    writeUsers(users);
+    const { password: _pw, ...profile } = updated;
+    setUser(profile);
+    return profile;
   };
 
   return { user, loading, register, login, logout, updateProfile, setUser };

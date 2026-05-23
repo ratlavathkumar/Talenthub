@@ -126,7 +126,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-2 rounded-full px-4 border-orange-200 dark:border-orange-800/40 text-orange-700 dark:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-900/20">
                     {user.profileImageUrl ? (
-                      <img src={`/api/storage${user.profileImageUrl}`} alt={user.name} className="w-5 h-5 rounded-full object-cover" />
+                      <img src={user.profileImageUrl ?? undefined} alt={user.name} className="w-5 h-5 rounded-full object-cover" />
                     ) : (
                       <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-[10px] font-bold">
                         {user.name.charAt(0).toUpperCase()}

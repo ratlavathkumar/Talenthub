@@ -8,7 +8,7 @@ import {
   useGetStatsSummary,
   useGetApplicationsOverTime,
   useGetStatsByCategory
-} from "@workspace/api-client-react";
+} from "@/lib/local-hooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { Layout } from "../components/layout";
 import { AdminGate } from "../components/admin-gate";
@@ -606,26 +606,22 @@ function UsersManager() {
   }>>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-  const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
-  const fetchUsers = async () => {
+  const fetchUsers = () => {
     setLoading(true);
     try {
-      const r = await fetch(`${BASE}/api/admin/users`, { credentials: "include" });
-      if (r.ok) setUsers(await r.json());
+      const raw = JSON.parse(localStorage.getItem("talentHub_users") || "[]");
+      setUsers(raw.map(({ password: _pw, ...u }: any) => u));
     } finally { setLoading(false); }
   };
 
   useEffect(() => { fetchUsers(); }, []);
 
-  const deleteUser = async (id: number) => {
-    try {
-      await fetch(`${BASE}/api/admin/users/${id}`, { method: "DELETE", credentials: "include" });
-      setUsers(u => u.filter(x => x.id !== id));
-      toast({ title: "User deleted" });
-    } catch {
-      toast({ title: "Delete failed", variant: "destructive" });
-    }
+  const deleteUser = (id: number) => {
+    const all = JSON.parse(localStorage.getItem("talentHub_users") || "[]");
+    localStorage.setItem("talentHub_users", JSON.stringify(all.filter((u: any) => u.id !== id)));
+    setUsers(u => u.filter(x => x.id !== id));
+    toast({ title: "User deleted" });
   };
 
   if (loading) return <SkeletonTable />;
@@ -681,42 +677,30 @@ function CompaniesManager() {
   }>>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-  const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
-  const fetchCompanies = async () => {
+  const fetchCompanies = () => {
     setLoading(true);
     try {
-      const r = await fetch(`${BASE}/api/admin/companies`, { credentials: "include" });
-      if (r.ok) setCompanies(await r.json());
+      const raw = JSON.parse(localStorage.getItem("talentHub_companies") || "[]");
+      setCompanies(raw.map(({ password: _pw, ...c }: any) => c));
     } finally { setLoading(false); }
   };
 
   useEffect(() => { fetchCompanies(); }, []);
 
-  const toggleApproval = async (id: number, approved: boolean) => {
-    try {
-      const r = await fetch(`${BASE}/api/admin/companies/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ approved }),
-      });
-      const updated = await r.json();
-      setCompanies(cs => cs.map(c => c.id === id ? { ...c, approved: updated.approved } : c));
-      toast({ title: approved ? "Company approved" : "Company suspended" });
-    } catch {
-      toast({ title: "Update failed", variant: "destructive" });
-    }
+  const toggleApproval = (id: number, approved: boolean) => {
+    const all = JSON.parse(localStorage.getItem("talentHub_companies") || "[]");
+    const updated = all.map((c: any) => c.id === id ? { ...c, approved } : c);
+    localStorage.setItem("talentHub_companies", JSON.stringify(updated));
+    setCompanies(cs => cs.map(c => c.id === id ? { ...c, approved } : c));
+    toast({ title: approved ? "Company approved" : "Company suspended" });
   };
 
-  const deleteCompany = async (id: number) => {
-    try {
-      await fetch(`${BASE}/api/admin/companies/${id}`, { method: "DELETE", credentials: "include" });
-      setCompanies(cs => cs.filter(c => c.id !== id));
-      toast({ title: "Company deleted" });
-    } catch {
-      toast({ title: "Delete failed", variant: "destructive" });
-    }
+  const deleteCompany = (id: number) => {
+    const all = JSON.parse(localStorage.getItem("talentHub_companies") || "[]");
+    localStorage.setItem("talentHub_companies", JSON.stringify(all.filter((c: any) => c.id !== id)));
+    setCompanies(cs => cs.filter(c => c.id !== id));
+    toast({ title: "Company deleted" });
   };
 
   if (loading) return <SkeletonTable />;

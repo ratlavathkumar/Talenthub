@@ -13,7 +13,7 @@ import {
   useGetApplicationsOverTime,
   getListJobsQueryKey,
   getListApplicationsQueryKey,
-} from "@workspace/api-client-react";
+} from "@/lib/local-hooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { Layout } from "@/components/layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -320,7 +320,7 @@ function ApplicationsTab({ companyId }: { companyId: number }) {
               <div key={app.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-border/60 hover:border-border transition-colors">
                 <div className="flex items-center gap-3">
                   {app.profileImageUrl ? (
-                    <img src={`/api/storage${app.profileImageUrl.startsWith("/objects") ? app.profileImageUrl : `/objects/${app.profileImageUrl}`}`} alt={app.applicantName} className="w-10 h-10 rounded-full object-cover border border-border" />
+                    <img src={app.profileImageUrl} alt={app.applicantName} className="w-10 h-10 rounded-full object-cover border border-border" />
                   ) : (
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-violet-600 flex items-center justify-center text-white font-semibold text-sm">
                       {app.applicantName.charAt(0).toUpperCase()}
@@ -334,7 +334,7 @@ function ApplicationsTab({ companyId }: { companyId: number }) {
                 </div>
                 <div className="flex items-center gap-2 ml-13 sm:ml-0">
                   {app.resumeUrl && (
-                    <a href={`/api/storage${app.resumeUrl.startsWith("/objects") ? app.resumeUrl : `/objects/${app.resumeUrl}`}`} target="_blank" rel="noopener noreferrer">
+                    <a href={app.resumeUrl ?? "#"} target="_blank" rel="noopener noreferrer">
                       <Button size="sm" variant="outline" className="gap-1.5 h-8 text-xs"><FileText className="w-3 h-3" />Resume</Button>
                     </a>
                   )}
@@ -525,7 +525,7 @@ function ProfileTab() {
             <div className="relative">
               {logoPreview || company?.logoUrl ? (
                 <img
-                  src={logoPreview ?? `/api/storage${company!.logoUrl}`}
+                  src={logoPreview ?? company!.logoUrl ?? undefined}
                   alt="Logo"
                   className="w-16 h-16 rounded-xl object-cover border-2 border-border"
                 />

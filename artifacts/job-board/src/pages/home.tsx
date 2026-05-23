@@ -1,4 +1,4 @@
-import { useListJobs, useGetStatsSummary, useGetStatsByCategory } from "@workspace/api-client-react";
+import { useListJobs, useGetStatsSummary, useGetStatsByCategory } from "@/lib/local-hooks";
 import { Link, useLocation } from "wouter";
 import { Layout } from "../components/layout";
 import { JobCard } from "../components/job-card";
